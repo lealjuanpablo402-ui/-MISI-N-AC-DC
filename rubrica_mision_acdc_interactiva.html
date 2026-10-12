@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rúbrica Misión AC/DC</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0c0c0e;font-family:Arial,Helvetica,sans-serif;color:#eee}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+.panel{background:#151517;border:3px solid #ffc400;border-radius:14px;padding:16px;box-shadow:0 0 22px rgba(255,196,0,.25);position:relative;overflow:hidden}
+.panel::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:#e3262e}
+h1{margin:6px 0 0;font-size:24px;color:#ffc400;letter-spacing:2px;text-align:center}
+.sub{text-align:center;font-size:13px;color:#b8b8b8;margin:4px 0 12px}
+.top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:10px}
+input[type=text]{padding:8px;border-radius:8px;border:1px solid #ffc400;background:#0c0c0e;color:#fff;min-width:200px;flex:1}
+button{cursor:pointer;border:0;border-radius:8px;padding:9px 12px;font-weight:bold;font-size:13px;color:#fff;background:#444}
+button:hover{background:#666}
+button.warn{background:#e3262e}
+button.warn:hover{background:#ff3b44}
+button.go{background:#ffc400;color:#111}
+button.go:hover{background:#ffd84d}
+button.off{background:#555;color:#fff}
+.bar{height:14px;background:#0c0c0e;border:1px solid #ffc400;border-radius:8px;overflow:hidden;margin:8px 0}
+.bar div{height:100%;width:0;background:linear-gradient(90deg,#e3262e,#ffc400,#2ecc71);transition:width .5s}
+.status{font-size:13px;color:#b8b8b8;margin-bottom:10px}
+table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px;line-height:1.4}
+th{background:#ffc400;color:#111;font-weight:bold;text-align:left;padding:10px;border:1px solid #111}
+td{padding:10px;border:1px solid #bbb;vertical-align:top;word-wrap:break-word}
+tbody tr:nth-child(odd) td{background:#ffffff;color:#1a1a1a}
+tbody tr:nth-child(even) td{background:#f6f6f6;color:#1a1a1a}
+td.crit{font-weight:bold;color:#111}
+td.crit small{display:block;font-weight:normal;color:#555;margin-top:4px}
+td.crit em{display:inline-block;font-style:normal;font-size:11px;background:#111;color:#ffc400;border-radius:4px;padding:1px 6px;margin-top:5px}
+td.lvl{cursor:pointer;transition:.15s}
+td.lvl:hover{outline:3px solid #ffc400;outline-offset:-3px}
+td.lvl.sel{background:#fff1b8 !important;outline:3px solid #e3262e;outline-offset:-3px}
+.led{display:inline-block;width:12px;height:12px;border-radius:50%;background:#999;margin-right:6px;vertical-align:middle}
+.led.l50{background:#e67e22;box-shadow:0 0 8px #e67e22}
+.led.l75{background:#f1c40f;box-shadow:0 0 8px #f1c40f}
+.led.l100{background:#2ecc71;box-shadow:0 0 8px #2ecc71}
+.res{margin-top:14px;padding:14px;border-radius:12px;background:#0c0c0e;border:2px dashed #ffc400;text-align:center;display:none}
+.res .score{font-size:34px;font-weight:bold;color:#ffc400}
+.res .rank{font-size:18px;margin-top:4px}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.safety{margin-top:14px;padding:12px;border-radius:10px;background:#1d1d20;border:1px solid #e3262e;font-size:13px}
+.safety label{display:block;margin:5px 0;cursor:pointer}
+.legend{font-size:12px;color:#b8b8b8;margin-top:10px;text-align:center}
+@media(max-width:700px){
+table,thead,tbody,tr,th,td{display:block;width:100%}
+thead{display:none}
+td.lvl::before{content:attr(data-l);display:block;font-weight:bold;color:#e3262e;margin-bottom:4px}
+tr{margin-bottom:12px;border:2px solid #ffc400;border-radius:10px;overflow:hidden}
+}
+@media print{body{background:#fff;color:#000}.btns,.top button,.safety input{display:none}.panel{box-shadow:none}.sub,.status,.legend{color:#333}}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="panel">
+<h1>⚡ MISIÓN AC/DC</h1>
+<div class="sub">Rúbrica analítica | Iluminación de Alta Tensión | Prácticas Profesionalizantes | 6.° año Electromecánica</div>
+
+<div class="top">
+<input type="text" id="alumno" placeholder="Nombre del equipo o estudiante">
+<button id="bSound" class="go" onclick="toggleSound()">🔊 Sonido: ON</button>
+</div>
+
+<div class="bar"><div id="prog"></div></div>
+<div class="status" id="status">Tocá un nivel en cada criterio para registrar el desempeño (0 de 7 completados).</div>
+
+<table>
+<thead><tr>
+<th style="width:21%">Criterio de Evaluación</th>
+<th style="width:26%">Excelente (100%)</th>
+<th style="width:26%">Satisfactorio (75%)</th>
+<th style="width:27%">En Proceso (50%)</th>
+</tr></thead>
+<tbody id="tb"></tbody>
+</table>
+
+<div class="safety">
+<b>🦺 Checklist de seguridad antes del montaje real (bonus de +5 puntos si se marcan los 5)</b>
+<label><input type="checkbox" class="sf"> Simulé y validé el circuito en Tinkercad antes de proponer el montaje físico</label>
+<label><input type="checkbox" class="sf"> La carga de alta tensión se conmuta solo por los contactos del relé, separada del Arduino</label>
+<label><input type="checkbox" class="sf"> Verifiqué las limitaciones de corriente (resistencias del LED y del divisor de tensión)</label>
+<label><input type="checkbox" class="sf"> Documenté las pruebas, incluidas las fallas y sus correcciones</label>
+<label><input type="checkbox" class="sf"> Indiqué EPP, corte de energía y verificación de ausencia de tensión para el montaje real</label>
+</div>
+
+<div class="btns">
+<button class="go" onclick="calcular()">📊 Calcular resultado</button>
+<button class="warn" onclick="reiniciar()">↺ Reiniciar</button>
+<button onclick="copiar()">📋 Copiar resultado</button>
+<button onclick="window.print()">🖨 Imprimir / PDF</button>
+</div>
+
+<div class="res" id="res">
+<div class="score" id="score"></div>
+<div class="rank" id="rank"></div>
+<div id="fb" style="margin-top:8px;font-size:13px;color:#b8b8b8"></div>
+</div>
+
+<div class="legend">Puntaje por criterio: Excelente 100% | Satisfactorio 75% | En Proceso 50%. La nota final es el promedio ponderado según el peso de cada criterio.</div>
+</div></div>
+
+<script>
+var C=[
+{n:"1. Definición del reto y diagnóstico del circuito",f:"Fase 1 | Nodos 1 y 2",w:20,d:"Comprender el dilema del Stage Manager y detectar las fallas del sistema con el expediente técnico.",
+ l:["Reformula el reto con sus palabras. Detecta todas las fallas del circuito contrastándolo con el plano y la ficha del sensor LDR. Justifica cada falla con evidencia (valores, conexiones, esquema).",
+    "Reformula el reto con precisión parcial. Detecta la falla principal y omite alguna secundaria. Justifica con evidencia incompleta.",
+    "Describe síntomas del sistema sin determinar la causa. No contrasta con el expediente técnico. Justificación escasa o ausente."]},
+{n:"2. Indagación técnica (LDR, divisor de tensión, relé)",f:"Fase 2 | Nodo 2",w:15,d:"Fundamentar la solución con conocimiento técnico del expediente y fuentes.",
+ l:["Explica con vocabulario técnico preciso el funcionamiento del LDR, el divisor de tensión, la lectura analógica y la conmutación del relé. Cita las fuentes del expediente y calcula valores clave.",
+    "Explica los principios principales con alguna imprecisión. Cita fuentes de forma parcial. Cálculos incompletos.",
+    "Explicación superficial o con errores conceptuales. Sin fuentes ni cálculos que respalden la solución."]},
+{n:"3. Prototipado en Tinkercad Circuits (WebLab)",f:"Fase 3 | Nodo 3",w:25,d:"Reproducir, probar y validar la solución en el laboratorio virtual.",
+ l:["El circuito corregido funciona: ajusta el umbral de luz y la sensibilidad, el relé conmuta el reflector y el LCD informa el estado. Verifica con multímetro virtual y comparte enlace y captura anotada.",
+    "El circuito funciona con simplificaciones menores. Ajusta el umbral sin documentar la sensibilidad. Comparte enlace o captura sin anotaciones.",
+    "El circuito tiene errores de conexión, de código o de lógica que impiden la conmutación. No documenta las pruebas o no entrega enlace verificable."]},
+{n:"4. Divulgación: videobitácora y Muro Social",f:"Fase 4 | Nodo 4",w:15,d:"Narrar el proceso y publicar el circuito corregido.",
+ l:["Videobitácora de 1 minuto con hilo narrativo completo (reto, diagnóstico, simulación, solución) y vocabulario técnico preciso. Publica el circuito corregido en el Muro con buena calidad de imagen y sonido.",
+    "Cubre las etapas principales con algunos pasos poco desarrollados. Publica en el Muro con calidad suficiente. Duración con desvíos menores.",
+    "Fragmentos sin hilo narrativo. Vocabulario técnico escaso. Publicación incompleta o con calidad que dificulta la comprensión."]},
+{n:"5. Coevaluación y trabajo colaborativo",f:"Fase 4 | Nodo 4 | Comunicación horizontal",w:10,d:"Aportar y retroalimentar a los pares en el foro.",
+ l:["Aportes técnicos fundamentados desde el inicio. Retroalimenta al menos a dos compañeros con sugerencias concretas. Coevaluación justa y con evidencias. Cumple plazos.",
+    "Participa con regularidad con poca fundamentación. Retroalimenta a un compañero con comentarios generales. Coevaluación con criterios y escasa evidencia.",
+    "Participación esporádica sin contenido técnico. No retroalimenta o lo hace sin argumentos. Coevaluación incompleta. No cumple plazos."]},
+{n:"6. Seguridad y criterio profesional (transversal)",f:"Todas las fases",w:5,d:"Criterio sugerido: cultura de prevención al pasar del simulador al montaje real.",
+ l:["Aísla la alta tensión del circuito de control, dimensiona protecciones y resistencias, y propone EPP, corte de energía y verificación de ausencia de tensión para el montaje físico. Detecta riesgos sin ayuda.",
+    "Considera las medidas principales con omisiones puntuales sin riesgo inmediato. Detecta algunos riesgos con ayuda.",
+    "Considera las medidas de seguridad solo con indicaciones reiteradas del docente. No identifica los riesgos de trabajar con alta tensión."]},
+{n:"7. Autoevaluación y pedagogía del error",f:"Todas las fases",w:10,d:"Criterio sugerido: metacognición sobre aciertos, errores y mejoras.",
+ l:["Reflexiona con ejemplos concretos sobre aciertos, errores de la simulación y correcciones realizadas. Relaciona lo aprendido con situaciones reales de planta y propone un plan de mejora.",
+    "Reflexiona sobre lo realizado con ejemplos generales. Identifica errores pero propone mejoras poco concretas.",
+    "Reflexión superficial o descriptiva. No identifica errores ni propone mejoras."]}
+];
+var NIV=[100,75,50],NOM=["Excelente","Satisfactorio","En Proceso"];
+var sel=[],sound=true,ac=null;
+
+function ctx(){if(!ac){try{ac=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}return ac}
+function tone(f,t,d,type){if(!sound)return;var a=ctx();if(!a)return;var o=a.createOscillator(),g=a.createGain();
+ o.type=type||"square";o.frequency.value=f;g.gain.setValueAtTime(.08,a.currentTime+t);
+ g.gain.exponentialRampToValueAtTime(.001,a.currentTime+t+d);o.connect(g);g.connect(a.destination);
+ o.start(a.currentTime+t);o.stop(a.currentTime+t+d+.02)}
+function sLevel(p){if(p===50){tone(330,0,.15)}else if(p===75){tone(392,0,.12);tone(523,.12,.15)}else{tone(523,0,.1);tone(659,.1,.1);tone(784,.2,.2)}}
+function sDone(){[523,659,784,1047,1319].forEach(function(f,i){tone(f,i*.12,.25,"triangle")})}
+function sReset(){tone(440,0,.12,"sawtooth");tone(330,.12,.12,"sawtooth");tone(220,.24,.2,"sawtooth")}
+
+function build(){
+ var h="";
+ C.forEach(function(c,i){
+  h+='<tr><td class="crit"><span class="led" id="led'+i+'"></span>'+c.n+'<small>Peso: '+c.w+'%. '+c.d+'</small><em>'+c.f+'</em></td>';
+  c.l.forEach(function(t,j){h+='<td class="lvl" data-l="'+NOM[j]+' ('+NIV[j]+'%)" id="c'+i+'_'+j+'" onclick="pick('+i+','+j+')">'+t+'</td>'});
+  h+='</tr>';
+ });
+ document.getElementById("tb").innerHTML=h;
+}
+function pick(i,j){
+ sel[i]=j;
+ for(var k=0;k<3;k++){document.getElementById("c"+i+"_"+k).classList.toggle("sel",k===j)}
+ document.getElementById("led"+i).className="led l"+NIV[j];
+ sLevel(NIV[j]);upd();
+}
+function upd(){
+ var n=sel.filter(function(x){return x!==undefined}).length;
+ document.getElementById("prog").style.width=(n/C.length*100)+"%";
+ document.getElementById("status").textContent=n===C.length?"Todos los criterios completos. Presioná Calcular resultado.":"Tocá un nivel en cada criterio ("+n+" de "+C.length+" completados).";
+}
+function bonus(){var n=0;document.querySelectorAll(".sf").forEach(function(c){if(c.checked)n++});return n===5?5:0}
+function datos(){
+ var tot=0,ok=0;C.forEach(function(c,i){if(sel[i]!==undefined){tot+=c.w*NIV[sel[i]]/100;ok++}});
+ return {ok:ok,nota:Math.min(100,Math.round((tot+bonus())*10)/10)};
+}
+function rango(n){return n>=90?"🎸 Stage Manager Legendario":n>=75?"⚡ Técnico de Gira":n>=60?"🔧 Roadie":"🛠 Aprendiz de Backstage"}
+function calcular(){
+ var d=datos();
+ if(d.ok<C.length){document.getElementById("status").textContent="Faltan "+(C.length-d.ok)+" criterio(s) por completar.";tone(200,0,.3,"sawtooth");return}
+ var r=document.getElementById("res");r.style.display="block";
+ document.getElementById("score").textContent=d.nota+" / 100";
+ document.getElementById("rank").textContent=rango(d.nota);
+ document.getElementById("fb").textContent=d.nota>=90?"¡SHOW SALVADO! Los reflectores se encienden solos y el equipo es impecable.":d.nota>=75?"Falla resuelta y circuito operativo. Pulí los detalles para llegar a la excelencia.":d.nota>=60?"Solución aceptable. Revisá los criterios en nivel En Proceso.":"Los reflectores siguen sin responder. Retomá el diagnóstico y reforzá las pruebas en el WebLab.";
+ sDone();
+}
+function reiniciar(){
+ sel=[];document.querySelectorAll("td.lvl").forEach(function(t){t.classList.remove("sel")});
+ C.forEach(function(c,i){document.getElementById("led"+i).className="led"});
+ document.querySelectorAll(".sf").forEach(function(c){c.checked=false});
+ document.getElementById("res").style.display="none";document.getElementById("alumno").value="";
+ upd();sReset();
+}
+function copiar(){
+ var d=datos(),t="MISIÓN AC/DC | Iluminación de Alta Tensión\nEquipo/Estudiante: "+(document.getElementById("alumno").value||"-")+"\n";
+ C.forEach(function(c,i){t+=c.n+": "+(sel[i]!==undefined?NOM[sel[i]]+" ("+NIV[sel[i]]+"%)":"sin evaluar")+"\n"});
+ t+="Bonus seguridad: +"+bonus()+"\nNota final: "+d.nota+"/100 | "+rango(d.nota);
+ var done=function(){document.getElementById("status").textContent="Resultado copiado al portapapeles.";tone(880,0,.1,"triangle")};
+ if(navigator.clipboard){navigator.clipboard.writeText(t).then(done)}else{var a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();document.execCommand("copy");document.body.removeChild(a);done()}
+}
+function toggleSound(){sound=!sound;var b=document.getElementById("bSound");b.textContent=sound?"🔊 Sonido: ON":"🔇 Sonido: OFF";b.className=sound?"go":"off";if(sound)tone(660,0,.1)}
+build();
+</script>
+</body>
+</html>
